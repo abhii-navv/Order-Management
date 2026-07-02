@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const authenticate = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const authorizeRoles = require('../middleware/roleCheck');
 const { lowStock, salesSummary, auditLog, topProducts } = require('../controllers/reportController');
 
