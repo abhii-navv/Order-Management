@@ -21,6 +21,7 @@ const lowStock = async (req, res) => {
       byCategory,
     });
   } catch (err) {
+    console.error('Report Error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
@@ -91,6 +92,7 @@ const salesSummary = async (req, res) => {
 
     res.json({ period: trunc, limit: safeLimit, summary: enriched, totals });
   } catch (err) {
+    console.error('Report Error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
@@ -109,6 +111,7 @@ const auditLog = async (req, res) => {
       totalPages: result.totalPages,
     });
   } catch (err) {
+    console.error('Report Error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
@@ -168,6 +171,7 @@ const topProducts = async (req, res) => {
 
     res.json({ products: enriched, grandTotalRevenue: grandTotal.toFixed(2) });
   } catch (err) {
+    console.error('Report Error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
@@ -214,6 +218,7 @@ const customerAnalytics = async (req, res) => {
 
     res.json({ count: customers.length, customers });
   } catch (err) {
+    console.error('Report Error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
@@ -264,6 +269,7 @@ const dashboardKpis = async (req, res) => {
       newCustomersThisMonth: newCustomersThisMonth.rows[0].count,
     });
   } catch (err) {
+    console.error('Report Error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
