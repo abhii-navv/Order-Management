@@ -2,6 +2,8 @@
 
 A full-stack Inventory and Order Management system built with Node.js, Express, PostgreSQL, and React.
 
+> 🚧 Currently in development
+
 ## Tech Stack
 - **Backend** — Node.js, Express.js, PostgreSQL, JWT
 - **Frontend** — React 18, Vite, Axios
