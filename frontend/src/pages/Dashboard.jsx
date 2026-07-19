@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
+import { getStatusStyle } from '../statusBadge';
 import '../styles/table.css';
 
 export default function Dashboard() {
@@ -179,21 +180,7 @@ export default function Dashboard() {
                   <tr key={o.id}>
                     <td style={{ fontWeight: 600 }}>#{o.id}</td>
                     <td>
-                      <span style={{
-                        padding: '2px 10px',
-                        borderRadius: '99px',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        background: o.status === 'delivered' ? 'rgba(16,185,129,0.15)' :
-                                    o.status === 'cancelled' ? 'rgba(239,68,68,0.15)' :
-                                    o.status === 'pending'   ? 'rgba(245,158,11,0.15)' :
-                                    'rgba(99,102,241,0.15)',
-                        color: o.status === 'delivered' ? '#34d399' :
-                               o.status === 'cancelled' ? '#f87171' :
-                               o.status === 'pending'   ? '#fbbf24' :
-                               '#a78bfa',
-                      }}>
+                      <span style={getStatusStyle(o.status)}>
                         {o.status}
                       </span>
                     </td>
