@@ -10,6 +10,7 @@ const categoryRoutes = require('./src/routes/categoryRoutes');
 const productRoutes = require('./src/routes/productRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
 const reportRoutes = require('./src/routes/reportRoutes');
+const requestLogger = require('./src/middleware/requestLogger');
 
 const app = express();
 
@@ -79,14 +80,9 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 
-// ── Request Logger (dev) ───────────────────────────────────────────────────────
-if (process.env.NODE_ENV !== 'production') {
-  app.use((req, _res, next) => {
-    const ts = new Date().toISOString();
-    console.log(`[${ts}] ${req.method} ${req.originalUrl}`);
-    next();
-  });
-}
+// ── Request Logger ─────────────────────────────────────────────────────────────
+// Structured logger: coloured dev output, JSON in production (response-time aware)
+app.use(requestLogger);
 
 // ── API Routes ─────────────────────────────────────────────────────────────────
 app.use('/api/v1/auth', authRoutes);
