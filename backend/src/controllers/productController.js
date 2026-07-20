@@ -8,7 +8,7 @@ const {
   softDeleteProduct,
   restockProduct,
 } = require('../models/Product');
-const { writeAuditLog } = require('../models/StockAuditLog');
+const { writeAuditLog, getAuditLog } = require('../models/StockAuditLog');
 
 // ── Validation ─────────────────────────────────────────────────────────────────
 
@@ -164,6 +164,25 @@ const restock = async (req, res) => {
   }
 };
 
+/**
+ * GET /api/v1/products/:id/audit-log
+ * Returns paginated stock audit history for a given product (admin only).
+ */
+const getProductAuditLog = async (req, res) => {
+  try {
+    const product = await getProductById(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+
+    const page  = parseInt(req.query.page,  10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
+
+    const result = await getAuditLog({ product_id: req.params.id, page, limit });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 module.exports = {
   getAll,
   getOne,
@@ -171,6 +190,7 @@ module.exports = {
   update,
   remove,
   restock,
+  getProductAuditLog,
   productValidation,
   updateProductValidation,
 };
