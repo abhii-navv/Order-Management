@@ -92,12 +92,47 @@ app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/reports', reportRoutes);
 
 // ── Health Check ───────────────────────────────────────────────────────────────
+// Probes DB connectivity so load-balancers / readiness probes get real signal.
+const pool = require('./src/config/db');
+
+app.get('/api/v1/health', async (req, res) => {
+  const start = Date.now();
+  let dbStatus = 'ok';
+  let dbLatencyMs = null;
+  try {
+    const client = await pool.connect();
+    await client.query('SELECT 1');
+    dbLatencyMs = Date.now() - start;
+    client.release();
+  } catch {
+    dbStatus = 'error';
+  }
+
+  const mem = process.memoryUsage();
+  const status = dbStatus === 'ok' ? 200 : 503;
+
+  res.status(status).json({
+    status:      dbStatus === 'ok' ? 'healthy' : 'degraded',
+    version:     process.env.npm_package_version || '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    uptime:      Math.round(process.uptime()),
+    database: {
+      status:    dbStatus,
+      latencyMs: dbLatencyMs,
+    },
+    memory: {
+      heapUsedMB:  (mem.heapUsed  / 1024 / 1024).toFixed(2),
+      heapTotalMB: (mem.heapTotal / 1024 / 1024).toFixed(2),
+      rssMB:       (mem.rss       / 1024 / 1024).toFixed(2),
+    },
+  });
+});
+
+// Keep a minimal root alias for browsers
 app.get('/', (req, res) => {
   res.json({
     message: '📦 Inventory & Order Management API is running',
-    version: process.env.npm_package_version || '1.0.0',
-    environment: process.env.NODE_ENV || 'development',
-    uptime: process.uptime(),
+    health:  '/api/v1/health',
   });
 });
 
