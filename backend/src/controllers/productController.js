@@ -52,6 +52,15 @@ const updateProductValidation = [
     .withMessage('Low-stock threshold must be a non-negative integer'),
 ];
 
+// Max units that can be added in a single restock call (configurable via env)
+const MAX_RESTOCK_QTY = parseInt(process.env.MAX_RESTOCK_QTY || '10000', 10);
+
+const restockValidation = [
+  body('quantity')
+    .isInt({ min: 1, max: MAX_RESTOCK_QTY })
+    .withMessage(`Quantity must be a positive integer (max ${MAX_RESTOCK_QTY})`),
+];
+
 // ── Controllers ────────────────────────────────────────────────────────────────
 
 const getAll = async (req, res) => {
@@ -126,10 +135,10 @@ const remove = async (req, res) => {
 };
 
 const restock = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
   const quantity = parseInt(req.body.quantity, 10);
-  if (!quantity || quantity <= 0) {
-    return res.status(400).json({ message: 'Quantity must be a positive integer' });
-  }
 
   const client = await pool.connect();
   try {
@@ -193,4 +202,5 @@ module.exports = {
   getProductAuditLog,
   productValidation,
   updateProductValidation,
+  restockValidation,
 };
