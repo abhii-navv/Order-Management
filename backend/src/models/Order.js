@@ -84,7 +84,7 @@ const getOrderById = async (id) => {
  * Create a new order and its line items inside an active transaction client.
  * Total is computed here to ensure server-side price integrity (not trusting client).
  */
-const createOrder = async (client, { user_id, items, notes }) => {
+const createOrder = async (client, { user_id, items, notes, shipping_address }) => {
   let total = 0;
   for (const item of items) {
     total += Number(item.unit_price) * Number(item.quantity);
@@ -93,8 +93,8 @@ const createOrder = async (client, { user_id, items, notes }) => {
   total = Math.round(total * 100) / 100;
 
   const orderResult = await client.query(
-    `INSERT INTO orders (user_id, total_amount, notes) VALUES ($1,$2,$3) RETURNING *`,
-    [user_id, total, notes || null]
+    `INSERT INTO orders (user_id, total_amount, notes, shipping_address) VALUES ($1,$2,$3,$4) RETURNING *`,
+    [user_id, total, notes || null, shipping_address || null]
   );
   const order = orderResult.rows[0];
 
