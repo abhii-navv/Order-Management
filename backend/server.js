@@ -1,4 +1,14 @@
 require('dotenv').config();
+
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'your_secret_key_here' || process.env.JWT_SECRET === 'supersecretkey123') {
+  console.error('❌ FATAL: JWT_SECRET is missing or using a default/insecure value.');
+  process.exit(1);
+}
+if (!process.env.DATABASE_URL) {
+  console.error('❌ FATAL: DATABASE_URL is missing.');
+  process.exit(1);
+}
+
 const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
@@ -25,16 +35,18 @@ app.use((req, res, next) => {
 
 // ── Security Middleware ────────────────────────────────────────────────────────
 // Set secure HTTP headers to prevent common web vulnerabilities (XSS, clickjacking, etc.)
+const helmet = require('helmet');
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      objectSrc: ["'none'"]
+    }
+  }
+}));
 app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=()');
-  res.setHeader(
-    'Content-Security-Policy',
-    "default-src 'self'; script-src 'self'; object-src 'none';"
-  );
   next();
 });
 
