@@ -17,6 +17,10 @@ const productValidation = [
     .trim()
     .notEmpty().withMessage('Product name is required')
     .isLength({ max: 200 }).withMessage('Product name must be 200 characters or fewer'),
+  body('category_id')
+    .optional({ nullable: true, checkFalsy: true })
+    .isInt({ min: 1 })
+    .withMessage('Category ID must be a positive integer'),
   body('price')
     .isFloat({ gt: 0 })
     .withMessage('Price must be a positive number'),
@@ -42,6 +46,10 @@ const updateProductValidation = [
     .trim()
     .notEmpty().withMessage('Product name cannot be blank')
     .isLength({ max: 200 }).withMessage('Product name must be 200 characters or fewer'),
+  body('category_id')
+    .optional({ nullable: true, checkFalsy: true })
+    .isInt({ min: 1 })
+    .withMessage('Category ID must be a positive integer'),
   body('price')
     .optional()
     .isFloat({ gt: 0 })
@@ -97,6 +105,13 @@ const create = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
+  if (req.body.category_id) {
+    const categoryResult = await pool.query('SELECT 1 FROM categories WHERE id = $1', [req.body.category_id]);
+    if (categoryResult.rowCount === 0) {
+      return res.status(400).json({ message: `Category with ID ${req.body.category_id} not found` });
+    }
+  }
+
   try {
     const product = await createProduct(req.body);
     res.status(201).json({ product });
@@ -113,6 +128,13 @@ const update = async (req, res) => {
   // Prevent any attempt to change SKU after creation (immutable identifier)
   if (req.body.sku !== undefined) {
     return res.status(400).json({ message: 'SKU cannot be changed after product creation' });
+  }
+
+  if (req.body.category_id) {
+    const categoryResult = await pool.query('SELECT 1 FROM categories WHERE id = $1', [req.body.category_id]);
+    if (categoryResult.rowCount === 0) {
+      return res.status(400).json({ message: `Category with ID ${req.body.category_id} not found` });
+    }
   }
 
   try {

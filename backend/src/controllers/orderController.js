@@ -3,6 +3,7 @@ const pool = require('../config/db');
 const { getAllOrders, getOrderById, createOrder, updateOrderStatus, isValidTransition } = require('../models/Order');
 const { getProductById } = require('../models/Product');
 const { writeAuditLog } = require('../models/StockAuditLog');
+const PDFDocument = require('pdfkit');
 
 // ── Validation ─────────────────────────────────────────────────────────────────
 
@@ -22,6 +23,12 @@ const orderValidation = [
     .trim()
     .isLength({ max: 500 })
     .withMessage('Notes must be 500 characters or fewer'),
+  body('shipping_address')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 1000 })
+    .withMessage('Shipping address must be 1000 characters or fewer'),
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -122,6 +129,7 @@ const placeOrder = async (req, res) => {
       user_id: req.user.id,
       items: enrichedItems,
       notes: req.body.notes,
+      shipping_address: req.body.shipping_address,
     });
 
     await client.query('COMMIT');
@@ -226,4 +234,63 @@ const getOrderItems = async (req, res) => {
   }
 };
 
-module.exports = { getAll, getMyOrders, getOne, getOrderItems, placeOrder, updateStatus, orderValidation };
+const getInvoice = async (req, res) => {
+  try {
+    const order = await getOrderById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    if (req.user.role !== 'admin' && order.user_id !== req.user.id)
+      return res.status(403).json({ message: 'Access denied' });
+
+    const doc = new PDFDocument({ margin: 50 });
+    const filename = `invoice-${order.id}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    doc.pipe(res);
+
+    doc.fontSize(20).text('Inventory & Order Management', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(16).text(`Invoice #${order.id}`);
+    doc.fontSize(12).text(`Date: ${new Date(order.created_at).toLocaleDateString()}`);
+    doc.text(`Customer: ${order.customer_name} (${order.customer_email})`);
+    if (order.shipping_address) {
+      doc.moveDown();
+      doc.text(`Shipping Address:\n${order.shipping_address}`);
+    }
+    
+    doc.moveDown(2);
+    
+    doc.fontSize(12)
+       .text('Product', 50, doc.y, { continued: true, width: 200 })
+       .text('SKU', 250, doc.y, { continued: true, width: 100 })
+       .text('Qty', 350, doc.y, { continued: true, width: 50 })
+       .text('Price', 400, doc.y, { continued: true, width: 50 })
+       .text('Total', 450, doc.y);
+       
+    doc.moveDown(0.5);
+    doc.moveTo(50, doc.y).lineTo(500, doc.y).stroke();
+    doc.moveDown(0.5);
+
+    let currentY = doc.y;
+    for (const item of order.items) {
+      doc.text(item.product_name || 'Item', 50, currentY, { width: 190 });
+      doc.text(item.sku || 'N/A', 250, currentY, { width: 90 });
+      doc.text(item.quantity.toString(), 350, currentY, { width: 40 });
+      doc.text(Number(item.unit_price).toFixed(2), 400, currentY, { width: 40 });
+      doc.text((Number(item.quantity) * Number(item.unit_price)).toFixed(2), 450, currentY);
+      currentY = doc.y + 10;
+    }
+    
+    doc.y = currentY;
+    doc.moveTo(50, doc.y).lineTo(500, doc.y).stroke();
+    doc.moveDown(1);
+    
+    doc.fontSize(14).text(`Order Total: Rs ${Number(order.total_amount).toFixed(2)}`, { align: 'right' });
+    doc.end();
+
+  } catch (err) {
+    console.error('Invoice Error:', err);
+    res.status(500).json({ message: 'Server error generating invoice', error: err.message });
+  }
+};
+
+module.exports = { getAll, getMyOrders, getOne, getOrderItems, placeOrder, updateStatus, orderValidation, getInvoice };

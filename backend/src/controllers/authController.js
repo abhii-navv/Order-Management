@@ -55,7 +55,8 @@ const register = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
+  const role = 'user'; // Force role to user for public registration
 
   try {
     const existing = await findUserByEmail(email);
@@ -68,6 +69,26 @@ const register = async (req, res) => {
 
     const { password: _, ...safeUser } = user;
     res.status(201).json({ token, user: safeUser });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+const createAdmin = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  const { name, email, password } = req.body;
+
+  try {
+    const existing = await findUserByEmail(email);
+    if (existing) return res.status(409).json({ message: 'Email already registered' });
+
+    const hashed = await bcrypt.hash(password, 12);
+    const user = await createUser({ name, email, password: hashed, role: 'admin' });
+
+    const { password: _, ...safeUser } = user;
+    res.status(201).json({ message: 'Admin user created successfully', user: safeUser });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
@@ -103,10 +124,14 @@ const login = async (req, res) => {
  * Logout — blacklists the current JWT so it cannot be reused even before expiry.
  * This solves the classic "JWT logout" problem without needing a database per request.
  */
-const logout = (req, res) => {
-  const { jti, exp } = req.user;
-  blacklistToken(jti, exp);
-  res.json({ message: 'Logged out successfully. Token has been revoked.' });
+const logout = async (req, res) => {
+  try {
+    const { jti, exp } = req.user;
+    await blacklistToken(jti, exp);
+    res.json({ message: 'Logged out successfully. Token has been revoked.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
 };
 
 /**
@@ -134,7 +159,7 @@ const changePassword = async (req, res) => {
     await updateUserPassword(user.id, hashed);
 
     // Revoke old token — all existing sessions are invalidated
-    blacklistToken(req.user.jti, req.user.exp);
+    await blacklistToken(req.user.jti, req.user.exp);
 
     // Issue a fresh token
     const { token } = generateToken({ ...user, password: hashed });
@@ -157,6 +182,7 @@ const getMe = async (req, res) => {
 
 module.exports = {
   register, registerValidation,
+  createAdmin,
   login, loginValidation,
   logout,
   changePassword, changePasswordValidation,
