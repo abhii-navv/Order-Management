@@ -4,7 +4,7 @@ import api from '../api';
 import '../styles/auth.css';
 
 export default function Register() {
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'user' });
+  const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -62,10 +62,6 @@ export default function Register() {
               {showPassword ? '🙈' : '👁️'}
             </button>
           </div>
-          <select className="input" value={form.role} onChange={e => setForm({...form, role: e.target.value})}>
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-          </select>
           <button className="btn" type="submit" disabled={loading}>{loading ? 'Creating account...' : 'Register'}</button>
         </form>
         <p>Have account? <Link to="/login">Sign in</Link></p>

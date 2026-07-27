@@ -10,6 +10,7 @@ export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [items, setItems] = useState([{ product_id:'', quantity:1 }]);
+  const [shippingAddress, setShippingAddress] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -56,9 +57,10 @@ export default function Orders() {
     const validItems = items.filter(i => i.product_id && i.quantity > 0);
     if (validItems.length === 0) { setError('Please select at least one product.'); return; }
     try {
-      await api.post('/orders', { items: validItems });
+      await api.post('/orders', { items: validItems, shipping_address: shippingAddress });
       setShowForm(false);
       setItems([{ product_id:'', quantity:1 }]);
+      setShippingAddress('');
       setSuccess('✅ Order placed successfully!');
       fetchOrders(1);
       setPage(1);
@@ -74,6 +76,21 @@ export default function Orders() {
       fetchOrders(page);
     } catch (err) {
       setError(err.friendlyMessage || err.response?.data?.message || 'Failed to update status');
+    }
+  };
+
+  const downloadInvoice = async (id) => {
+    try {
+      const res = await api.get(`/orders/${id}/invoice`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `invoice-${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      setError('Failed to download invoice');
     }
   };
 
@@ -125,6 +142,15 @@ export default function Orders() {
                 )}
               </div>
             ))}
+            <div className="row" style={{ marginTop: '10px' }}>
+              <textarea
+                className="input"
+                placeholder="Shipping Address (optional)"
+                value={shippingAddress}
+                onChange={e => setShippingAddress(e.target.value)}
+                style={{ width: '100%', minHeight: '60px' }}
+              />
+            </div>
             <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
               <button type="button" className="btn-outline"
                 onClick={() => setItems([...items,{product_id:'',quantity:1}])}>+ Add Item</button>
@@ -148,12 +174,12 @@ export default function Orders() {
                 <th>Status</th>
                 <th>Total</th>
                 <th>Date</th>
-                {user.role==='admin' && <th>Actions</th>}
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {orders.length === 0 && (
-                <tr><td colSpan={user.role==='admin' ? 6 : 4} className="empty-row">No orders yet.</td></tr>
+                <tr><td colSpan={user.role==='admin' ? 6 : 5} className="empty-row">No orders yet.</td></tr>
               )}
               {orders.map(o => (
                 <tr key={o.id}>
@@ -162,20 +188,25 @@ export default function Orders() {
                   <td><span className={`badge badge-${o.status}`}>{o.status}</span></td>
                   <td style={{ fontWeight: 500 }}>₹{Number(o.total_amount).toFixed(2)}</td>
                   <td style={{ color: 'var(--text-light)' }}>{new Date(o.created_at).toLocaleDateString()}</td>
-                  {user.role==='admin' && (
-                    <td style={{ whiteSpace: 'nowrap' }}>
-                      {NEXT[o.status] && (
-                        <button className="btn-sm" onClick={() => updateStatus(o.id, NEXT[o.status])}>
-                          → {NEXT[o.status]}
-                        </button>
-                      )}
-                      {['pending','confirmed'].includes(o.status) && (
-                        <button className="btn-sm btn-danger" onClick={() => updateStatus(o.id,'cancelled')}>
-                          Cancel
-                        </button>
-                      )}
-                    </td>
-                  )}
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    <button className="btn-sm btn-outline" onClick={() => downloadInvoice(o.id)} style={{ marginRight: '5px' }}>
+                      Invoice
+                    </button>
+                    {user.role==='admin' && (
+                      <>
+                        {NEXT[o.status] && (
+                          <button className="btn-sm" onClick={() => updateStatus(o.id, NEXT[o.status])}>
+                            → {NEXT[o.status]}
+                          </button>
+                        )}
+                        {['pending','confirmed'].includes(o.status) && (
+                          <button className="btn-sm btn-danger" onClick={() => updateStatus(o.id,'cancelled')}>
+                            Cancel
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
