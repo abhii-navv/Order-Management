@@ -12,6 +12,11 @@ const createTables = async () => {
       created_at TIMESTAMP DEFAULT NOW()
     );
 
+    CREATE TABLE IF NOT EXISTS revoked_tokens (
+      jti        VARCHAR(255) PRIMARY KEY,
+      expires_at TIMESTAMP NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS categories (
       id          SERIAL PRIMARY KEY,
       name        VARCHAR(100) UNIQUE NOT NULL,
@@ -40,6 +45,7 @@ const createTables = async () => {
                    CHECK (status IN ('pending','confirmed','packed','shipped','delivered','cancelled')),
       total_amount NUMERIC(10,2) NOT NULL,
       notes        TEXT,
+      shipping_address TEXT,
       created_at   TIMESTAMP DEFAULT NOW(),
       updated_at   TIMESTAMP DEFAULT NOW()
     );
@@ -66,6 +72,8 @@ const createTables = async () => {
 
   try {
     await pool.query(query);
+    // Idempotent column migration — safe to run on existing databases
+    await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_address TEXT`);
     console.log('✅ All tables created (or already exist)');
   } catch (err) {
     console.error('❌ Table creation failed:', err.message);
