@@ -2,19 +2,19 @@
 
 A full-stack Inventory and Order Management system built with Node.js, Express, PostgreSQL, and React.
 
-> 🚧 Currently in development
-
 ## Tech Stack
-- **Backend** — Node.js, Express.js, PostgreSQL, JWT
+- **Backend** — Node.js, Express.js, PostgreSQL, JWT, Helmet, PDFKit
 - **Frontend** — React 18, Vite, Axios
 
 ## Features
 - JWT authentication + role-based access (user/admin)
+- DB-persisted JWT blacklist (logout survives server restarts)
 - Product & category management with soft deletes
-- Order placement with database transactions
+- Order placement with database transactions and optional `shipping_address`
 - Stock audit logging & low-stock alerts
 - Comprehensive Analytics & Reports Dashboard
-- PDF invoice generation
+- PDF invoice generation (`GET /orders/:id/invoice`)
+- Helmet security headers + auth rate limiting (5 req / 15 min per IP)
 
 ---
 
@@ -33,7 +33,9 @@ cd Order-Management-API
 ### 2. Configure environment variables
 ```bash
 cp backend/.env.example backend/.env
-# Edit backend/.env and fill in your DB credentials & JWT secret
+# Edit backend/.env — generate a strong JWT_SECRET with:
+#   openssl rand -hex 64
+# Fill in DATABASE_URL with your PostgreSQL connection string.
 ```
 
 ### 3. Install dependencies
@@ -61,13 +63,16 @@ npm run dev        # starts on http://localhost:5173
 All routes are prefixed with `/api/v1`.
 
 ### Auth — `/auth`
-| Method | Path                | Auth | Description               |
-|--------|---------------------|------|---------------------------|
-| POST   | `/auth/register`    | ✗    | Register a new account    |
-| POST   | `/auth/login`       | ✗    | Obtain a JWT token        |
-| POST   | `/auth/logout`      | ✓    | Revoke the current token  |
-| GET    | `/auth/me`          | ✓    | Get current user profile  |
-| PUT    | `/auth/password`    | ✓    | Change account password   |
+| Method | Path                    | Auth  | Description                                  |
+|--------|-------------------------|-------|----------------------------------------------|
+| POST   | `/auth/register`        | ✗     | Register a new account (role always = user)  |
+| POST   | `/auth/login`           | ✗     | Obtain a JWT token                           |
+| POST   | `/auth/logout`          | ✓     | Revoke the current token (DB blacklist)      |
+| GET    | `/auth/me`              | ✓     | Get current user profile                     |
+| POST   | `/auth/change-password` | ✓     | Change account password                      |
+| POST   | `/auth/create-admin`    | Admin | Create a new admin user (admin only)         |
+
+> **Rate limiting**: `/auth/register` and `/auth/login` are limited to **5 requests per 15 minutes per IP**.
 
 ### Products — `/products`
 | Method | Path                      | Auth  | Description                     |
@@ -88,17 +93,28 @@ All routes are prefixed with `/api/v1`.
 | DELETE | `/categories/:id`   | Admin | Delete a category    |
 
 ### Orders — `/orders`
-| Method | Path                     | Auth  | Description                         |
-|--------|--------------------------|-------|-------------------------------------|
-| GET    | `/orders`                | Admin | List all orders                     |
-| GET    | `/orders/my`             | ✓     | List current user's orders          |
-| GET    | `/orders/:id`            | ✓     | Get order details + invoice PDF     |
-| POST   | `/orders`                | ✓     | Place a new order                   |
-| PATCH  | `/orders/:id/status`     | Admin | Update order status                 |
+| Method | Path                     | Auth  | Description                                          |
+|--------|--------------------------|-------|------------------------------------------------------|
+| GET    | `/orders`                | Admin | List all orders                                      |
+| GET    | `/orders/my`             | ✓     | List current user's orders                           |
+| GET    | `/orders/:id`            | ✓     | Get order details (admin sees any; user sees own)    |
+| POST   | `/orders`                | ✓     | Place a new order (optional: `shipping_address`)     |
+| PATCH  | `/orders/:id/status`     | Admin | Update order status                                  |
+| GET    | `/orders/:id/invoice`    | ✓     | Download PDF invoice (admin sees any; user sees own) |
+
+#### Order request body
+```json
+{
+  "items": [{ "product_id": 1, "quantity": 2 }],
+  "notes": "Leave at door",
+  "shipping_address": "123 Main St, Mumbai 400001"
+}
+```
+`shipping_address` is **optional**. When provided it is printed on the PDF invoice.
 
 ### Reports — `/reports` *(Admin only)*
 | Method | Path                        | Description                        |
-|--------|-----------------------------|------------------------------------|
+|--------|-----------------------------|-------------------------------------|
 | GET    | `/reports/dashboard-kpis`   | High-level KPI summary             |
 | GET    | `/reports/low-stock`        | Products below their threshold     |
 | GET    | `/reports/sales`            | Revenue & orders over time         |
