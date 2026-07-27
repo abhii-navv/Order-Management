@@ -1,19 +1,14 @@
 const jwt = require('jsonwebtoken');
+const pool = require('../config/db');
 
 /**
- * In-memory token blacklist for invalidated JWTs (logout / password-change).
- * In production this should be replaced with a Redis SET for distributed deployments.
- * Entries are keyed by JWT `jti` (JWT ID) and expire automatically after the token's TTL.
+ * Purge expired entries from the blacklist every 5 minutes.
  */
-const blacklistedJtis = new Map(); // jti -> expiry (unix seconds)
-
-/**
- * Purge expired entries from the blacklist every 5 minutes to prevent memory leaks.
- */
-setInterval(() => {
-  const now = Math.floor(Date.now() / 1000);
-  for (const [jti, exp] of blacklistedJtis.entries()) {
-    if (exp < now) blacklistedJtis.delete(jti);
+setInterval(async () => {
+  try {
+    await pool.query('DELETE FROM revoked_tokens WHERE expires_at < NOW()');
+  } catch (err) {
+    console.error('Failed to purge revoked tokens:', err.message);
   }
 }, 5 * 60 * 1000);
 
@@ -22,15 +17,22 @@ setInterval(() => {
  * @param {string} jti  - JWT ID claim
  * @param {number} exp  - Token expiry as unix timestamp (seconds)
  */
-const blacklistToken = (jti, exp) => {
-  if (jti && exp) blacklistedJtis.set(jti, exp);
+const blacklistToken = async (jti, exp) => {
+  if (jti && exp) {
+    // exp is in seconds, postgres needs it in milliseconds or timestamp
+    const expiresAt = new Date(exp * 1000);
+    await pool.query(
+      'INSERT INTO revoked_tokens (jti, expires_at) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+      [jti, expiresAt]
+    );
+  }
 };
 
 /**
  * Authentication middleware.
  * Validates the Bearer JWT, checks the blacklist, and attaches `req.user`.
  */
-const authenticate = (req, res, next) => {
+const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -42,9 +44,11 @@ const authenticate = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Reject tokens that have been explicitly invalidated (logout / password change)
-    if (decoded.jti && blacklistedJtis.has(decoded.jti)) {
-      return res.status(401).json({ message: 'Token has been revoked. Please log in again.' });
+    if (decoded.jti) {
+      const result = await pool.query('SELECT 1 FROM revoked_tokens WHERE jti = $1', [decoded.jti]);
+      if (result.rowCount > 0) {
+        return res.status(401).json({ message: 'Token has been revoked. Please log in again.' });
+      }
     }
 
     req.user = decoded;
