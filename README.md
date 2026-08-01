@@ -1,7 +1,7 @@
 # 📦 Inventory & Order Management API
 
 A full-stack Inventory and Order Management system built with Node.js, Express, PostgreSQL, and React.
-Project is live in:[Order-Management-Api](https://order-management-api-wsir.vercel.app/)
+- Project is live in:[Order-Management-Api](https://order-management-api-wsir.vercel.app/)
 
 ## Tech Stack
 - **Backend** — Node.js, Express.js, PostgreSQL, JWT, Helmet, PDFKit
