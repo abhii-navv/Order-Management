@@ -94,30 +94,45 @@ export default function Dashboard() {
         {user.role === 'admin' && kpis && (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-            gap: '16px',
-            marginBottom: '32px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '24px',
+            marginBottom: '40px',
           }}>
             {kpiCards.map(card => (
               <div key={card.label} style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius)',
-                padding: '20px 24px',
+                background: 'rgba(17, 24, 39, 0.4)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '24px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '8px',
-                boxShadow: 'var(--shadow)',
-                transition: 'transform 0.2s, box-shadow 0.2s',
+                gap: '12px',
+                boxShadow: '0 10px 40px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                position: 'relative',
+                overflow: 'hidden'
               }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.4)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = 'var(--shadow)'; }}
+                onMouseEnter={e => { 
+                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)'; 
+                  e.currentTarget.style.boxShadow = `0 20px 40px -10px rgba(0,0,0,0.7), 0 0 20px ${card.color}33, inset 0 1px 0 rgba(255, 255, 255, 0.1)`; 
+                  e.currentTarget.style.borderColor = `${card.color}66`;
+                }}
+                onMouseLeave={e => { 
+                  e.currentTarget.style.transform = ''; 
+                  e.currentTarget.style.boxShadow = '0 10px 40px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)'; 
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                }}
               >
-                <span style={{ fontSize: '24px' }}>{card.icon}</span>
-                <span style={{ fontSize: '28px', fontWeight: 800, color: card.color, lineHeight: 1 }}>
-                  {card.value}
-                </span>
-                <span style={{ fontSize: '12px', color: 'var(--text-light)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: `radial-gradient(circle, ${card.color}22 0%, transparent 70%)`, filter: 'blur(10px)', zIndex: 0 }}></div>
+                <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '28px', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '12px' }}>{card.icon}</span>
+                  <span style={{ fontSize: '32px', fontWeight: 800, color: card.color, lineHeight: 1, textShadow: `0 0 15px ${card.color}44` }}>
+                    {card.value}
+                  </span>
+                </div>
+                <span style={{ position: 'relative', zIndex: 1, fontSize: '13px', color: 'var(--text-light)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   {card.label}
                 </span>
               </div>
