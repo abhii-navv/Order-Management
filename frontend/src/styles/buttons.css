@@ -128,7 +128,12 @@
   box-shadow: none !important;
 }
 
-.btn:focus, .btn-outline:focus, .btn-sm:focus {
+.btn:focus-visible, .btn-outline:focus-visible, .btn-sm:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.6);
+}
+
+.btn:focus:not(:focus-visible), .btn-outline:focus:not(:focus-visible), .btn-sm:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
 }
