@@ -96,15 +96,6 @@ export default function Orders() {
 
   return (
     <div>
-      <nav className="navbar">
-        <span>📦 Inventory Manager</span>
-        <div>
-          <Link to="/">Dashboard</Link>
-          <Link to="/products">Products</Link>
-          <Link to="/categories">Categories</Link>
-          <Link to="/orders" className="active-link">Orders</Link>
-        </div>
-      </nav>
       <div className="container">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
           <div>
@@ -183,12 +174,12 @@ export default function Orders() {
               )}
               {orders.map(o => (
                 <tr key={o.id}>
-                  <td style={{ fontWeight: 600 }}>#{o.id}</td>
-                  {user.role==='admin' && <td>{o.customer_name || <em style={{ color: '#999' }}>—</em>}</td>}
-                  <td><span className={`badge badge-${o.status}`}>{o.status}</span></td>
-                  <td style={{ fontWeight: 500 }}>₹{Number(o.total_amount).toFixed(2)}</td>
-                  <td style={{ color: 'var(--text-light)' }}>{new Date(o.created_at).toLocaleDateString()}</td>
-                  <td style={{ whiteSpace: 'nowrap' }}>
+                  <td data-label="#" style={{ fontWeight: 600 }}>#{o.id}</td>
+                  {user.role==='admin' && <td data-label="Customer">{o.customer_name || <em style={{ color: '#999' }}>—</em>}</td>}
+                  <td data-label="Status"><span className={`badge badge-${o.status}`}>{o.status}</span></td>
+                  <td data-label="Total" style={{ fontWeight: 500 }}>₹{Number(o.total_amount).toFixed(2)}</td>
+                  <td data-label="Date" style={{ color: 'var(--text-light)' }}>{new Date(o.created_at).toLocaleDateString()}</td>
+                  <td data-label="Actions" style={{ whiteSpace: 'nowrap' }}>
                     <button className="btn-sm btn-outline" onClick={() => downloadInvoice(o.id)} style={{ marginRight: '5px' }}>
                       Invoice
                     </button>
