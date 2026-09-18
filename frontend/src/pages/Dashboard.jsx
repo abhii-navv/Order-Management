@@ -3,11 +3,21 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { getStatusStyle } from '../statusBadge';
 import '../styles/table.css';
+import {
+  ResponsiveContainer,
+  LineChart, Line,
+  BarChart, Bar,
+  XAxis, YAxis,
+  CartesianGrid, Tooltip,
+  Legend
+} from 'recharts';
 
 export default function Dashboard() {
   const [lowStock, setLowStock]         = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
   const [kpis, setKpis]                 = useState(null);
+  const [salesData, setSalesData]       = useState([]);
+  const [topProducts, setTopProducts]   = useState([]);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState('');
   const user     = JSON.parse(localStorage.getItem('user') || '{}');
@@ -30,6 +40,12 @@ export default function Dashboard() {
           : Promise.resolve(),
         user.role === 'admin'
           ? api.get('/reports/dashboard-kpis').then(r => setKpis(r.data)).catch(() => {})
+          : Promise.resolve(),
+        user.role === 'admin'
+          ? api.get('/reports/sales').then(r => setSalesData(r.data.data || [])).catch(() => {})
+          : Promise.resolve(),
+        user.role === 'admin'
+          ? api.get('/reports/top-products').then(r => setTopProducts(r.data.products || [])).catch(() => {})
           : Promise.resolve(),
       ]);
       setRecentOrders((ordersRes.data.orders || []).slice(0, 5));
@@ -56,18 +72,6 @@ export default function Dashboard() {
 
   return (
     <div>
-      <nav className="navbar">
-        <span>📦 Inventory Manager</span>
-        <div>
-          <Link to="/products">Products</Link>
-          <Link to="/categories">Categories</Link>
-          <Link to="/orders">Orders</Link>
-          {user.role === 'admin' && <Link to="/reports">Reports</Link>}
-          {user.role === 'admin' && <Link to="/audit-logs">Audit Logs</Link>}
-          <span style={{ color: 'var(--text-light)', fontSize: '13px' }}>| {user.name} ({user.role})</span>
-          <button onClick={logout}>Logout</button>
-        </div>
-      </nav>
       <div className="container">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
@@ -140,6 +144,46 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* ── Charts Section (admin only) ── */}
+        {user.role === 'admin' && (salesData.length > 0 || topProducts.length > 0) && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginBottom: '40px' }}>
+            {salesData.length > 0 && (
+              <div className="form-box" style={{ padding: '24px' }}>
+                <h4 style={{ marginBottom: '16px' }}>📈 Revenue Over Time</h4>
+                <ResponsiveContainer width="100%" height={220}>
+                  <LineChart data={salesData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="period" tick={{ fill: 'var(--text-light)', fontSize: 11 }} />
+                    <YAxis tick={{ fill: 'var(--text-light)', fontSize: 11 }} />
+                    <Tooltip
+                      contentStyle={{ background: 'var(--bg-surface-solid)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text)' }}
+                      formatter={(v) => [`₹${Number(v).toLocaleString()}`, 'Revenue']}
+                    />
+                    <Line type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={2} dot={{ fill: '#6366f1', r: 4 }} activeDot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+            {topProducts.length > 0 && (
+              <div className="form-box" style={{ padding: '24px' }}>
+                <h4 style={{ marginBottom: '16px' }}>🏆 Top Products by Revenue</h4>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={topProducts.slice(0, 5)} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="name" tick={{ fill: 'var(--text-light)', fontSize: 10 }} />
+                    <YAxis tick={{ fill: 'var(--text-light)', fontSize: 11 }} />
+                    <Tooltip
+                      contentStyle={{ background: 'var(--bg-surface-solid)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text)' }}
+                      formatter={(v) => [`₹${Number(v).toLocaleString()}`, 'Revenue']}
+                    />
+                    <Bar dataKey="revenue" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="link-row" style={{ display: 'flex', gap: '10px' }}>
           <Link to="/products" className="btn">🏷️ Products</Link>
           <Link to="/categories" className="btn">📁 Categories</Link>
@@ -193,14 +237,14 @@ export default function Dashboard() {
               <tbody>
                 {recentOrders.map(o => (
                   <tr key={o.id}>
-                    <td style={{ fontWeight: 600 }}>#{o.id}</td>
-                    <td>
+                    <td data-label="#" style={{ fontWeight: 600 }}>#{o.id}</td>
+                    <td data-label="Status">
                       <span style={getStatusStyle(o.status)}>
                         {o.status}
                       </span>
                     </td>
-                    <td style={{ fontWeight: 500 }}>₹{Number(o.total_amount).toFixed(2)}</td>
-                    <td style={{ color: 'var(--text-light)' }}>{new Date(o.created_at).toLocaleDateString()}</td>
+                    <td data-label="Total" style={{ fontWeight: 500 }}>₹{Number(o.total_amount).toFixed(2)}</td>
+                    <td data-label="Date" style={{ color: 'var(--text-light)' }}>{new Date(o.created_at).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
