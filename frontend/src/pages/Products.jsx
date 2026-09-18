@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
+import { useCart } from '../context/CartContext';
 import '../styles/table.css';
 
 export default function Products() {
@@ -25,6 +26,7 @@ export default function Products() {
   const [orderQty, setOrderQty] = useState({});   // { [productId]: quantity }
   const [orderingId, setOrderingId] = useState(null); // product id currently being ordered
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const { addToCart } = useCart();
 
   // Auto-dismiss error & success after 4s / 3s
   useEffect(() => {
@@ -147,25 +149,18 @@ export default function Products() {
     }
   };
 
-  // ── Place Order (non-admin, direct from product row) ───
-  const handlePlaceOrder = async (product) => {
+  // ── Add to Cart (non-admin, direct from product row) ───
+  const handleAddToCart = (product) => {
     const quantity = Number(orderQty[product.id]) || 1;
     if (quantity < 1) return;
     if (quantity > product.stock_quantity) {
       setError(`Only ${product.stock_quantity} unit(s) available for "${product.name}".`);
       return;
     }
-    setOrderingId(product.id);
-    try {
-      await api.post('/orders', { items: [{ product_id: product.id, quantity }] });
-      setSuccess(`✅ Order placed for ${quantity} × "${product.name}".`);
-      setOrderQty({ ...orderQty, [product.id]: '' });
-      fetchProducts(page);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to place order');
-    } finally {
-      setOrderingId(null);
-    }
+    
+    addToCart(product, quantity);
+    setSuccess(`🛒 Added ${quantity} × "${product.name}" to cart.`);
+    setOrderQty({ ...orderQty, [product.id]: '' });
   };
 
   const restockingProduct = products.find(p => p.id === restockId);
@@ -173,17 +168,6 @@ export default function Products() {
 
   return (
     <div>
-      {/* ── Navbar ── */}
-      <nav className="navbar">
-        <span>📦 Inventory Manager</span>
-        <div>
-          <Link to="/">Dashboard</Link>
-          <Link to="/products" className="active-link">Products</Link>
-          <Link to="/categories">Categories</Link>
-          <Link to="/orders">Orders</Link>
-        </div>
-      </nav>
-
       <div className="container">
         {/* ── Page Header ── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -415,10 +399,9 @@ export default function Products() {
                               />
                               <button
                                 className="btn-sm"
-                                disabled={orderingId === p.id}
-                                onClick={() => handlePlaceOrder(p)}
+                                onClick={() => handleAddToCart(p)}
                               >
-                                {orderingId === p.id ? 'Ordering...' : 'Order'}
+                                Add to Cart
                               </button>
                             </div>
                           )}
