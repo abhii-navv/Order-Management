@@ -3,11 +3,21 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { getStatusStyle } from '../statusBadge';
 import '../styles/table.css';
+import {
+  ResponsiveContainer,
+  LineChart, Line,
+  BarChart, Bar,
+  XAxis, YAxis,
+  CartesianGrid, Tooltip,
+  Legend
+} from 'recharts';
 
 export default function Dashboard() {
   const [lowStock, setLowStock]         = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
   const [kpis, setKpis]                 = useState(null);
+  const [salesData, setSalesData]       = useState([]);
+  const [topProducts, setTopProducts]   = useState([]);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState('');
   const user     = JSON.parse(localStorage.getItem('user') || '{}');
@@ -30,6 +40,12 @@ export default function Dashboard() {
           : Promise.resolve(),
         user.role === 'admin'
           ? api.get('/reports/dashboard-kpis').then(r => setKpis(r.data)).catch(() => {})
+          : Promise.resolve(),
+        user.role === 'admin'
+          ? api.get('/reports/sales').then(r => setSalesData(r.data.data || [])).catch(() => {})
+          : Promise.resolve(),
+        user.role === 'admin'
+          ? api.get('/reports/top-products').then(r => setTopProducts(r.data.products || [])).catch(() => {})
           : Promise.resolve(),
       ]);
       setRecentOrders((ordersRes.data.orders || []).slice(0, 5));
@@ -56,18 +72,6 @@ export default function Dashboard() {
 
   return (
     <div>
-      <nav className="navbar">
-        <span>📦 Inventory Manager</span>
-        <div>
-          <Link to="/products">Products</Link>
-          <Link to="/categories">Categories</Link>
-          <Link to="/orders">Orders</Link>
-          {user.role === 'admin' && <Link to="/reports">Reports</Link>}
-          {user.role === 'admin' && <Link to="/audit-logs">Audit Logs</Link>}
-          <span style={{ color: 'var(--text-light)', fontSize: '13px' }}>| {user.name} ({user.role})</span>
-          <button onClick={logout}>Logout</button>
-        </div>
-      </nav>
       <div className="container">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
@@ -94,34 +98,89 @@ export default function Dashboard() {
         {user.role === 'admin' && kpis && (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-            gap: '16px',
-            marginBottom: '32px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '24px',
+            marginBottom: '40px',
           }}>
             {kpiCards.map(card => (
               <div key={card.label} style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius)',
-                padding: '20px 24px',
+                background: 'rgba(17, 24, 39, 0.4)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '24px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '8px',
-                boxShadow: 'var(--shadow)',
-                transition: 'transform 0.2s, box-shadow 0.2s',
+                gap: '12px',
+                boxShadow: '0 10px 40px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                position: 'relative',
+                overflow: 'hidden'
               }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.4)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = 'var(--shadow)'; }}
+                onMouseEnter={e => { 
+                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)'; 
+                  e.currentTarget.style.boxShadow = `0 20px 40px -10px rgba(0,0,0,0.7), 0 0 20px ${card.color}33, inset 0 1px 0 rgba(255, 255, 255, 0.1)`; 
+                  e.currentTarget.style.borderColor = `${card.color}66`;
+                }}
+                onMouseLeave={e => { 
+                  e.currentTarget.style.transform = ''; 
+                  e.currentTarget.style.boxShadow = '0 10px 40px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)'; 
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                }}
               >
-                <span style={{ fontSize: '24px' }}>{card.icon}</span>
-                <span style={{ fontSize: '28px', fontWeight: 800, color: card.color, lineHeight: 1 }}>
-                  {card.value}
-                </span>
-                <span style={{ fontSize: '12px', color: 'var(--text-light)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: `radial-gradient(circle, ${card.color}22 0%, transparent 70%)`, filter: 'blur(10px)', zIndex: 0 }}></div>
+                <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '28px', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '12px' }}>{card.icon}</span>
+                  <span style={{ fontSize: '32px', fontWeight: 800, color: card.color, lineHeight: 1, textShadow: `0 0 15px ${card.color}44` }}>
+                    {card.value}
+                  </span>
+                </div>
+                <span style={{ position: 'relative', zIndex: 1, fontSize: '13px', color: 'var(--text-light)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   {card.label}
                 </span>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* ── Charts Section (admin only) ── */}
+        {user.role === 'admin' && (salesData.length > 0 || topProducts.length > 0) && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginBottom: '40px' }}>
+            {salesData.length > 0 && (
+              <div className="form-box" style={{ padding: '24px' }}>
+                <h4 style={{ marginBottom: '16px' }}>📈 Revenue Over Time</h4>
+                <ResponsiveContainer width="100%" height={220}>
+                  <LineChart data={salesData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="period" tick={{ fill: 'var(--text-light)', fontSize: 11 }} />
+                    <YAxis tick={{ fill: 'var(--text-light)', fontSize: 11 }} />
+                    <Tooltip
+                      contentStyle={{ background: 'var(--bg-surface-solid)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text)' }}
+                      formatter={(v) => [`₹${Number(v).toLocaleString()}`, 'Revenue']}
+                    />
+                    <Line type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={2} dot={{ fill: '#6366f1', r: 4 }} activeDot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+            {topProducts.length > 0 && (
+              <div className="form-box" style={{ padding: '24px' }}>
+                <h4 style={{ marginBottom: '16px' }}>🏆 Top Products by Revenue</h4>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={topProducts.slice(0, 5)} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="name" tick={{ fill: 'var(--text-light)', fontSize: 10 }} />
+                    <YAxis tick={{ fill: 'var(--text-light)', fontSize: 11 }} />
+                    <Tooltip
+                      contentStyle={{ background: 'var(--bg-surface-solid)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text)' }}
+                      formatter={(v) => [`₹${Number(v).toLocaleString()}`, 'Revenue']}
+                    />
+                    <Bar dataKey="revenue" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
         )}
 
@@ -178,14 +237,14 @@ export default function Dashboard() {
               <tbody>
                 {recentOrders.map(o => (
                   <tr key={o.id}>
-                    <td style={{ fontWeight: 600 }}>#{o.id}</td>
-                    <td>
+                    <td data-label="#" style={{ fontWeight: 600 }}>#{o.id}</td>
+                    <td data-label="Status">
                       <span style={getStatusStyle(o.status)}>
                         {o.status}
                       </span>
                     </td>
-                    <td style={{ fontWeight: 500 }}>₹{Number(o.total_amount).toFixed(2)}</td>
-                    <td style={{ color: 'var(--text-light)' }}>{new Date(o.created_at).toLocaleDateString()}</td>
+                    <td data-label="Total" style={{ fontWeight: 500 }}>₹{Number(o.total_amount).toFixed(2)}</td>
+                    <td data-label="Date" style={{ color: 'var(--text-light)' }}>{new Date(o.created_at).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>

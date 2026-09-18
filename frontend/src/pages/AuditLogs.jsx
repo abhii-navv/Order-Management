@@ -45,16 +45,6 @@ export default function AuditLogs() {
 
   return (
     <div>
-      <nav className="navbar">
-        <span>📦 Inventory Manager</span>
-        <div>
-          <Link to="/">Dashboard</Link>
-          <Link to="/products">Products</Link>
-          <Link to="/categories">Categories</Link>
-          <Link to="/orders">Orders</Link>
-          <Link to="/audit-logs" className="active-link">Audit Logs</Link>
-        </div>
-      </nav>
       <div className="container">
         <h2>Stock Audit Logs</h2>
         {error && <p className="error">{error}</p>}

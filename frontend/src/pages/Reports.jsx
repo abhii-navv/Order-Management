@@ -41,18 +41,6 @@ export default function Reports() {
 
   return (
     <div>
-      <nav className="navbar">
-        <span>📦 Inventory Manager</span>
-        <div>
-          <Link to="/">Dashboard</Link>
-          <Link to="/products">Products</Link>
-          <Link to="/categories">Categories</Link>
-          <Link to="/orders">Orders</Link>
-          <Link to="/reports" className="active-link">Reports</Link>
-          <Link to="/audit-logs">Audit Logs</Link>
-        </div>
-      </nav>
-
       <div className="container">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ margin: 0 }}>📊 Analytics & Reports</h2>

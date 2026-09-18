@@ -80,15 +80,6 @@ export default function Categories() {
 
   return (
     <div>
-      <nav className="navbar">
-        <span>📦 Inventory Manager</span>
-        <div>
-          <Link to="/">Dashboard</Link>
-          <Link to="/products">Products</Link>
-          <Link to="/categories" className="active-link">Categories</Link>
-          <Link to="/orders">Orders</Link>
-        </div>
-      </nav>
       <div className="container">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
           <div>
