@@ -145,7 +145,9 @@ const changePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   try {
-    const user = await findUserById(req.user.id);
+    // findUserById omits the password column (by design) — use findUserByEmail
+    // so we have the hashed password available for bcrypt.compare
+    const user = await findUserByEmail(req.user.email);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const match = await bcrypt.compare(currentPassword, user.password);
