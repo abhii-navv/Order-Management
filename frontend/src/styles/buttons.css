@@ -1,139 +1,150 @@
-.btn {
-  padding: 10px 20px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: var(--radius);
-  cursor: pointer;
-  margin-right: 8px;
-  margin-bottom: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
-  transition: var(--transition);
-  text-decoration: none;
-  position: relative;
-  overflow: hidden;
-}
+import { useState, useEffect } from 'react';
+import api from '../api';
+import '../styles/auth.css';
+import '../styles/table.css';
 
-.btn::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transform: skewX(-20deg);
-  transition: all 0.5s ease;
-}
+export default function Profile() {
+  const [user, setUser] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-.btn:hover::after {
-  left: 150%;
-}
+  useEffect(() => {
+    if (error) { const t = setTimeout(() => setError(''), 4000); return () => clearTimeout(t); }
+  }, [error]);
 
-.btn:hover {
-  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
-  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5), 0 0 0 1px var(--primary-light);
-  transform: translateY(-2px);
-}
+  useEffect(() => {
+    if (success) { const t = setTimeout(() => setSuccess(''), 4000); return () => clearTimeout(t); }
+  }, [success]);
 
-.btn:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
-}
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const [meRes, ordersRes] = await Promise.all([
+          api.get('/auth/me'),
+          api.get('/orders/my')
+        ]);
+        setUser(meRes.data.user);
+        setOrders(ordersRes.data.orders || []);
+      } catch (err) {
+        setError('Failed to load profile data.');
+      }
+    };
+    fetchProfile();
+  }, []);
 
-.btn-outline {
-  padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--text);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius);
-  cursor: pointer;
-  margin-right: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: var(--transition);
-  text-decoration: none;
-}
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await api.post('/auth/change-password', passwords);
+      // Backend invalidates the old token and issues a new one — persist it
+      if (res.data?.token) {
+        localStorage.setItem('token', res.data.token);
+      }
+      setSuccess('Password changed successfully.');
+      setPasswords({ currentPassword: '', newPassword: '' });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to change password');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-.btn-outline:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.25);
-  color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
+  if (!user) return <div className="container">Loading profile...</div>;
 
-.btn-outline:active {
-  transform: translateY(1px);
-}
+  return (
+    <div className="container">
+      <h2 style={{ marginBottom: '24px' }}>User Profile</h2>
 
-.btn-sm {
-  padding: 6px 14px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-light);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  margin-right: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: var(--transition-fast);
-  text-decoration: none;
-}
+      {error && <p className="error">{error}</p>}
+      {success && <p className="success-toast">{success}</p>}
 
-.btn-sm:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text);
-  border-color: rgba(255, 255, 255, 0.2);
-}
+      <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
 
-.btn-sm:active {
-  transform: translateY(0.5px);
-}
+        {/* Profile Info & Password Change */}
+        <div style={{ flex: 1, minWidth: '300px' }}>
+          <div className="form-box">
+            <h4>Profile Information</h4>
+            <div style={{ marginBottom: '12px' }}>
+              <span style={{ color: 'var(--text-light)', display: 'block', fontSize: '12px' }}>Name</span>
+              <strong>{user.name}</strong>
+            </div>
+            <div style={{ marginBottom: '12px' }}>
+              <span style={{ color: 'var(--text-light)', display: 'block', fontSize: '12px' }}>Email</span>
+              <strong>{user.email}</strong>
+            </div>
+            <div style={{ marginBottom: '12px' }}>
+              <span style={{ color: 'var(--text-light)', display: 'block', fontSize: '12px' }}>Role</span>
+              <span style={{ background: 'var(--primary-glow)', padding: '2px 8px', borderRadius: '4px', fontSize: '12px' }}>
+                {user.role}
+              </span>
+            </div>
+          </div>
 
-.btn-danger {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  box-shadow: none;
-}
+          <div className="form-box">
+            <h4>Change Password</h4>
+            <form onSubmit={handlePasswordChange}>
+              <input
+                className="input"
+                type="password"
+                placeholder="Current Password"
+                required
+                value={passwords.currentPassword}
+                onChange={e => setPasswords({ ...passwords, currentPassword: e.target.value })}
+              />
+              <input
+                className="input"
+                type="password"
+                placeholder="New Password"
+                required
+                minLength="6"
+                value={passwords.newPassword}
+                onChange={e => setPasswords({ ...passwords, newPassword: e.target.value })}
+              />
+              <button className="btn" type="submit" disabled={loading} style={{ width: '100%' }}>
+                {loading ? 'Updating...' : 'Update Password'}
+              </button>
+            </form>
+          </div>
+        </div>
 
-.btn-danger:hover {
-  background: rgba(239, 68, 68, 0.3);
-  color: #ffffff;
-  border-color: #ef4444;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
-}
+        {/* Order History */}
+        <div style={{ flex: 2, minWidth: '350px' }}>
+          <div className="form-box" style={{ padding: '24px 0' }}>
+            <h4 style={{ padding: '0 24px' }}>Recent Order History</h4>
+            {orders.length === 0 ? (
+              <p style={{ padding: '0 24px', color: 'var(--text-light)' }}>You haven't placed any orders yet.</p>
+            ) : (
+              <table className="table" style={{ margin: 0, boxShadow: 'none', border: 'none', borderTop: '1px solid var(--border)' }}>
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map(order => (
+                    <tr key={order.id}>
+                      <td data-label="Order ID">#{order.id}</td>
+                      <td data-label="Date">{new Date(order.created_at).toLocaleDateString()}</td>
+                      <td data-label="Status">
+                        <span className={`badge badge-${order.status}`}>{order.status}</span>
+                      </td>
+                      <td data-label="Total">₹{Number(order.total_amount).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
 
-.btn:disabled, .btn-outline:disabled, .btn-sm:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-.btn:focus-visible, .btn-outline:focus-visible, .btn-sm:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.6);
-}
-
-.btn:focus:not(:focus-visible), .btn-outline:focus:not(:focus-visible), .btn-sm:focus:not(:focus-visible) {
-  outline: none;
-  box-shadow: none;
+      </div>
+    </div>
+  );
 }
