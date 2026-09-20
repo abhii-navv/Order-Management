@@ -58,12 +58,12 @@ export default function Profile() {
   return (
     <div className="container">
       <h2 style={{ marginBottom: '24px' }}>User Profile</h2>
-      
+
       {error && <p className="error">{error}</p>}
       {success && <p className="success-toast">{success}</p>}
 
       <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
-        
+
         {/* Profile Info & Password Change */}
         <div style={{ flex: 1, minWidth: '300px' }}>
           <div className="form-box">
