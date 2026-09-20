@@ -1,139 +1,89 @@
+/* Tables - Nova Capital Light Mode */
 .table {
   width: 100%;
   border-collapse: collapse;
   background: var(--bg-surface);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  margin-top: 20px;
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid var(--border);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 
 .table th {
   text-align: left;
-  padding: 14px 18px;
-  background: rgba(255, 255, 255, 0.02);
+  padding: 11px 16px;
+  background: var(--bg-surface-alt);
   font-size: 11px;
   font-weight: 700;
-  color: var(--text-light);
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   border-bottom: 1px solid var(--border);
 }
 
 .table td {
-  padding: 14px 18px;
+  padding: 13px 16px;
   border-bottom: 1px solid var(--border);
   color: var(--text-secondary);
   font-size: 14px;
 }
 
-.table tbody tr {
-  transition: var(--transition-fast);
-}
-
-.table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.04);
-  transform: scale(1.002);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.table tbody tr:last-child td {
-  border-bottom: none;
-}
+.table tbody tr { transition: var(--transition-fast); }
+.table tbody tr:hover { background: var(--bg-surface-alt); }
+.table tbody tr:last-child td { border-bottom: none; }
 
 .empty-row {
   text-align: center;
   color: var(--text-muted);
-  padding: 32px 0 !important;
-  font-style: italic;
+  padding: 36px 0 !important;
+  font-size: 14px;
 }
 
 .stock-low {
-  color: #f87171;
-  font-weight: 700;
-  background: rgba(239, 68, 68, 0.1);
-  padding: 2px 8px;
-  border-radius: 6px;
-  display: inline-block;
+  color: #B91C1C; font-weight: 600;
+  background: #FEF2F2; padding: 2px 8px;
+  border-radius: 6px; display: inline-block;
 }
 
 .stock-ok {
-  color: #34d399;
-  font-weight: 700;
-  background: rgba(16, 185, 129, 0.1);
-  padding: 2px 8px;
-  border-radius: 6px;
-  display: inline-block;
+  color: #065F46; font-weight: 600;
+  background: #ECFDF5; padding: 2px 8px;
+  border-radius: 6px; display: inline-block;
 }
 
 .form-box {
   background: var(--bg-surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 24px;
-  margin: 24px 0;
-  box-shadow: var(--shadow);
+  padding: 22px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
 }
 
 .form-box h4 {
-  margin-bottom: 18px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
+  font-size: 14px; font-weight: 600; color: var(--text);
+  margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
 }
 
-/* ── Mobile-first responsive tables ── */
+/* Mobile responsive tables */
 @media (max-width: 768px) {
-  .table, .table thead, .table tbody, .table th, .table td, .table tr {
-    display: block;
-  }
-
-  .table thead tr {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-  }
-
+  .table, .table thead, .table tbody, .table th, .table td, .table tr { display: block; }
+  .table thead tr { position: absolute; top: -9999px; left: -9999px; }
   .table tr {
     background: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    margin-bottom: 12px;
-    padding: 12px;
+    margin-bottom: 10px;
+    padding: 10px;
   }
-
-  .table tbody tr:hover {
-    transform: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  .table td {
-    border: none;
-    position: relative;
-    padding: 8px 8px 8px 48%;
-    min-height: 36px;
-    display: flex;
-    align-items: center;
-  }
-
+  .table tbody tr:hover { background: var(--bg-surface-alt); }
+  .table td { border: none; position: relative; padding: 7px 7px 7px 47%; min-height: 34px; display: flex; align-items: center; }
   .table td::before {
     content: attr(data-label);
-    position: absolute;
-    left: 12px;
-    width: 42%;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-light);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    position: absolute; left: 10px; width: 42%;
+    font-size: 11px; font-weight: 700;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;
   }
-
-  .table tbody tr:last-child td {
-    border-bottom: none;
-  }
+  .table tbody tr:last-child td { border-bottom: none; }
 }
