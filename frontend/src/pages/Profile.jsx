@@ -6,7 +6,7 @@ import '../styles/table.css';
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
-  const [passwords, setPasswords] = useState({ old_password: '', new_password: '' });
+  const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -26,7 +26,7 @@ export default function Profile() {
           api.get('/auth/me'),
           api.get('/orders/my')
         ]);
-        setUser(meRes.data);
+        setUser(meRes.data.user);
         setOrders(ordersRes.data.orders || []);
       } catch (err) {
         setError('Failed to load profile data.');
@@ -39,9 +39,13 @@ export default function Profile() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/auth/change-password', passwords);
+      const res = await api.post('/auth/change-password', passwords);
+      // Backend invalidates the old token and issues a new one — persist it
+      if (res.data?.token) {
+        localStorage.setItem('token', res.data.token);
+      }
       setSuccess('Password changed successfully.');
-      setPasswords({ old_password: '', new_password: '' });
+      setPasswords({ currentPassword: '', newPassword: '' });
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to change password');
     } finally {
@@ -88,8 +92,8 @@ export default function Profile() {
                 type="password"
                 placeholder="Current Password"
                 required
-                value={passwords.old_password}
-                onChange={e => setPasswords({ ...passwords, old_password: e.target.value })}
+                value={passwords.currentPassword}
+                onChange={e => setPasswords({ ...passwords, currentPassword: e.target.value })}
               />
               <input
                 className="input"
@@ -97,8 +101,8 @@ export default function Profile() {
                 placeholder="New Password"
                 required
                 minLength="6"
-                value={passwords.new_password}
-                onChange={e => setPasswords({ ...passwords, new_password: e.target.value })}
+                value={passwords.newPassword}
+                onChange={e => setPasswords({ ...passwords, newPassword: e.target.value })}
               />
               <button className="btn" type="submit" disabled={loading} style={{ width: '100%' }}>
                 {loading ? 'Updating...' : 'Update Password'}
