@@ -1,20 +1,20 @@
 /* Non-Vibecoded Standard Brutalist CSS */
 :root {
-  --bg-page: #EAEAEA;
-  --bg-sidebar: #D5D5D5;
-  --bg-surface: #F0F0F0;
-  --bg-surface-alt: #E0E0E0;
-  --primary: #000080;
-  --primary-dark: #000050;
-  --primary-light: #333399;
-  --primary-bg: #CCCCCC;
-  --primary-border: #999999;
-  --text: #222222;
-  --text-secondary: #333333;
-  --text-light: #555555;
-  --text-muted: #666666;
-  --border: #999999;
-  --border-strong: #666666;
+  --bg-page: #F9F6F0;
+  --bg-sidebar: #0F3A2E;
+  --bg-surface: #FFFFFF;
+  --bg-surface-alt: #F0EDE6;
+  --primary: #CFA85C;
+  --primary-dark: #B8924A;
+  --primary-light: #E4C37D;
+  --primary-bg: #FBF6EB;
+  --primary-border: #EAD7AC;
+  --text: #0F3A2E;
+  --text-secondary: #1B4B3D;
+  --text-light: #4A6B61;
+  --text-muted: #8D9E98;
+  --border: #E5DFD1;
+  --border-strong: #D1C9B6;
   --radius: 0px;
   --radius-lg: 0px;
   --radius-sm: 0px;
