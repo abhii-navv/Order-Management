@@ -116,7 +116,7 @@ export default function Sidebar() {
     <aside className="sidebar">
       {/* Logo */}
       <Link to="/" className="sidebar-logo">
-        <div className="sidebar-logo-icon">SE</div>
+        <div className="sidebar-logo-icon">🛍️</div>
         <span className="sidebar-logo-text">
           Shop<span>Ease</span>
         </span>

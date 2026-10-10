@@ -1,17 +1,38 @@
-/* Badges - Blocky/Brutalist */
+/* Badges - Light mode */
 .badge {
-  padding: 2px 6px;
-  border: 2px solid #000;
-  font-size: 12px;
-  font-weight: bold;
-  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.01em;
   display: inline-flex;
   align-items: center;
+  gap: 5px;
+  border: 1px solid transparent;
 }
 
-.badge-pending   { background: #FFCC00; color: #000; }
-.badge-confirmed { background: #0000FF; color: #FFF; }
-.badge-packed    { background: #990099; color: #FFF; }
-.badge-shipped   { background: #0099FF; color: #000; }
-.badge-delivered { background: #009900; color: #FFF; }
-.badge-cancelled { background: #CC0000; color: #FFF; }
+.badge::before {
+  content: "";
+  display: inline-block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+}
+
+.badge-pending   { background: #FFFBEB; color: #92400E; border-color: #FDE68A; }
+.badge-pending::before { background: #F59E0B; }
+
+.badge-confirmed { background: #EFF6FF; color: #1E40AF; border-color: #BFDBFE; }
+.badge-confirmed::before { background: #3B82F6; }
+
+.badge-packed    { background: #F5F3FF; color: #5B21B6; border-color: #DDD6FE; }
+.badge-packed::before { background: #8B5CF6; }
+
+.badge-shipped   { background: #ECFEFF; color: #155E75; border-color: #A5F3FC; }
+.badge-shipped::before { background: #06B6D4; }
+
+.badge-delivered { background: #ECFDF5; color: #065F46; border-color: #A7F3D0; }
+.badge-delivered::before { background: #059669; }
+
+.badge-cancelled { background: #FEF2F2; color: #991B1B; border-color: #FECACA; }
+.badge-cancelled::before { background: #EF4444; }

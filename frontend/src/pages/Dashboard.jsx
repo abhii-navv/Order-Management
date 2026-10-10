@@ -9,22 +9,22 @@ import {
 } from "recharts";
 
 const KPI_DEFS = [
-  { key: "ordersToday", label: "Orders Today", icon: "📦", color: "#3B82F6", bg: "#EFF6FF", border: "#BFDBFE", fmt: (v) => v },
-  { key: "revenueThisMonth", label: "Revenue This Month", icon: "💰", color: "#CFA85C", bg: "#FBF6EB", border: "#EAD7AC", fmt: (v) => `₹${Number(v).toLocaleString("en-IN")}` },
-  { key: "pendingOrders", label: "Pending Orders", icon: "⏳", color: "#F59E0B", bg: "#FFFBEB", border: "#FDE68A", fmt: (v) => v },
-  { key: "lowStockProducts", label: "Low Stock", icon: "⚠️", color: "#EF4444", bg: "#FEF2F2", border: "#FECACA", fmt: (v) => v },
-  { key: "newCustomersThisMonth", label: "New Customers", icon: "👤", color: "#8B5CF6", bg: "#F5F3FF", border: "#DDD6FE", fmt: (v) => v },
+  { key: "ordersToday",           label: "Orders Today",         icon: "📦", color: "#3B82F6", bg: "#EFF6FF", border: "#BFDBFE", fmt: (v) => v },
+  { key: "revenueThisMonth",      label: "Revenue This Month",   icon: "💰", color: "#CFA85C", bg: "#FBF6EB", border: "#EAD7AC", fmt: (v) => `₹${Number(v).toLocaleString("en-IN")}` },
+  { key: "pendingOrders",         label: "Pending Orders",       icon: "⏳", color: "#F59E0B", bg: "#FFFBEB", border: "#FDE68A", fmt: (v) => v },
+  { key: "lowStockProducts",      label: "Low Stock",            icon: "⚠️", color: "#EF4444", bg: "#FEF2F2", border: "#FECACA", fmt: (v) => v },
+  { key: "newCustomersThisMonth", label: "New Customers",        icon: "👤", color: "#8B5CF6", bg: "#F5F3FF", border: "#DDD6FE", fmt: (v) => v },
 ];
 
 const QUICK_LINKS = [
-  { to: "/products", label: "Products", icon: "📦", desc: "Manage inventory & stock" },
+  { to: "/products",   label: "Products",   icon: "📦", desc: "Manage inventory & stock" },
   { to: "/categories", label: "Categories", icon: "🏷️", desc: "Organise product groups" },
-  { to: "/orders", label: "Orders", icon: "📋", desc: "View & fulfil orders" },
-  { to: "/cart", label: "Cart", icon: "🛒", desc: "Add items & checkout" },
+  { to: "/orders",     label: "Orders",     icon: "📋", desc: "View & fulfil orders" },
+  { to: "/cart",       label: "Cart",       icon: "🛒", desc: "Add items & checkout" },
 ];
 
 const ADMIN_LINKS = [
-  { to: "/reports", label: "Reports", icon: "📊", desc: "Sales & revenue insights" },
+  { to: "/reports",    label: "Reports",    icon: "📊", desc: "Sales & revenue insights" },
   { to: "/audit-logs", label: "Audit Logs", icon: "🔍", desc: "Track all system changes" },
 ];
 
@@ -55,13 +55,13 @@ const CustomTooltip = ({ active, payload, label, prefix = "" }) => {
 };
 
 export default function Dashboard() {
-  const [lowStock, setLowStock] = useState([]);
+  const [lowStock, setLowStock]         = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
-  const [kpis, setKpis] = useState(null);
-  const [salesData, setSalesData] = useState([]);
-  const [topProducts, setTopProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [kpis, setKpis]                 = useState(null);
+  const [salesData, setSalesData]       = useState([]);
+  const [topProducts, setTopProducts]   = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState("");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   useEffect(() => {
@@ -74,10 +74,10 @@ export default function Dashboard() {
       const ordersEndpoint = user.role === "admin" ? "/orders" : "/orders/my";
       const [ordersRes] = await Promise.all([
         api.get(ordersEndpoint),
-        user.role === "admin" ? api.get("/reports/low-stock").then(r => setLowStock(r.data.products || [])).catch(() => { }) : Promise.resolve(),
-        user.role === "admin" ? api.get("/reports/dashboard-kpis").then(r => setKpis(r.data)).catch(() => { }) : Promise.resolve(),
-        user.role === "admin" ? api.get("/reports/sales").then(r => setSalesData(r.data.data || [])).catch(() => { }) : Promise.resolve(),
-        user.role === "admin" ? api.get("/reports/top-products").then(r => setTopProducts(r.data.products || [])).catch(() => { }) : Promise.resolve(),
+        user.role === "admin" ? api.get("/reports/low-stock").then(r => setLowStock(r.data.products || [])).catch(() => {}) : Promise.resolve(),
+        user.role === "admin" ? api.get("/reports/dashboard-kpis").then(r => setKpis(r.data)).catch(() => {}) : Promise.resolve(),
+        user.role === "admin" ? api.get("/reports/sales").then(r => setSalesData(r.data.data || [])).catch(() => {}) : Promise.resolve(),
+        user.role === "admin" ? api.get("/reports/top-products").then(r => setTopProducts(r.data.products || [])).catch(() => {}) : Promise.resolve(),
       ]);
       setRecentOrders((ordersRes.data.orders || []).slice(0, 6));
     } catch (err) {

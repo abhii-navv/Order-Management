@@ -4,48 +4,97 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: var(--bg-page);
+  position: relative;
+  overflow: hidden;
+}
+
+.center-page::before {
+  content: "";
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: rgba(139, 92, 246, 0.15);
+  border-radius: 50%;
+  filter: blur(80px);
+  top: 20%;
+  left: 25%;
+  z-index: 0;
+}
+
+.center-page::after {
+  content: "";
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  background: rgba(99, 102, 241, 0.12);
+  border-radius: 50%;
+  filter: blur(60px);
+  bottom: 20%;
+  right: 25%;
+  z-index: 0;
 }
 
 .card {
-  background: var(--bg-surface);
+  background: rgba(17, 24, 39, 0.45);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   padding: 48px 40px;
-  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 440px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 1;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .card h2 {
   text-align: center;
-  margin-bottom: 16px;
-  color: var(--text);
-  font-size: 24px;
-  font-weight: bold;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #e0e7ff 0%, #818cf8 50%, #4f46e5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
 .card h3 {
   text-align: center;
-  font-weight: normal;
-  color: var(--text-secondary);
-  margin-bottom: 24px;
-  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-light);
+  margin-bottom: 28px;
+  font-size: 15px;
+  justify-content: center;
 }
 
 .card p {
   text-align: center;
   margin-top: 24px;
-  color: var(--text-secondary);
+  color: var(--text-light);
   font-size: 14px;
 }
 
 .card p a {
-  color: var(--primary);
-  font-weight: bold;
-  text-decoration: underline;
+  color: var(--primary-light);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.card p a:hover {
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(167, 139, 250, 0.6);
 }
 
 .card form button[type="submit"] {
   width: 100%;
-  margin-top: 16px;
+  margin-top: 8px;
   padding: 12px;
 }
