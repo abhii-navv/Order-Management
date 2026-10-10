@@ -1,9 +1,3 @@
-🌟 Frontend (React/UI) Enhancements
-Full Shopping Cart System: Instead of ordering products one-by-one from the product row, you could build a dedicated Shopping Cart (using React Context or Redux) and a multi-step Checkout flow.
-Visual Charts & Analytics: The admin dashboard has KPI numbers, but you could integrate a library like Recharts or Chart.js to show visual graphs (e.g., "Sales over the last 30 days" or "Revenue by Category").
-Dark / Light Mode Toggle: The app currently has a beautiful dark theme. You could implement a theme switcher that persists the user's preference in localStorage.
-User Profile Settings: Since you have a /auth/change-password endpoint, you could build a dedicated "Profile" page where users can update their details, change passwords, and view their order history in detail.
-Mobile-First Tables: Standard HTML tables can be hard to read on mobile. You could implement responsive tables that collapse into "cards" on smaller screens.
 ⚙️ Backend (Node.js/Express) Enhancements
 Product Image Uploads: Integrate multer to allow admins to upload images for products, storing them locally or on a cloud provider like AWS S3 / Cloudinary.
 Email Notifications: Use Nodemailer to send actual emails. For example:

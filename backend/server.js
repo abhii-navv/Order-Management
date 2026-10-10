@@ -1,11 +1,11 @@
 require('dotenv').config();
 
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'your_secret_key_here' || process.env.JWT_SECRET === 'supersecretkey123') {
-  console.error('❌ FATAL: JWT_SECRET is missing or using a default/insecure value.');
+  console.error('FATAL: JWT_SECRET is missing or using a default/insecure value.');
   process.exit(1);
 }
 if (!process.env.DATABASE_URL) {
-  console.error('❌ FATAL: DATABASE_URL is missing.');
+  console.error('FATAL: DATABASE_URL is missing.');
   process.exit(1);
 }
 
@@ -36,6 +36,8 @@ app.use((req, res, next) => {
 // ── Security Middleware ────────────────────────────────────────────────────────
 // Set secure HTTP headers to prevent common web vulnerabilities (XSS, clickjacking, etc.)
 const helmet = require('helmet');
+const xss = require('xss-clean');
+const hpp = require('hpp');
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -45,6 +47,8 @@ app.use(helmet({
     }
   }
 }));
+app.use(xss());
+app.use(hpp());
 app.use((req, res, next) => {
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=()');
   next();
@@ -143,7 +147,7 @@ app.get('/api/v1/health', async (req, res) => {
 // Keep a minimal root alias for browsers
 app.get('/', (req, res) => {
   res.json({
-    message: '📦 Inventory & Order Management API is running',
+    message: 'Inventory & Order Management API is running',
     health:  '/api/v1/health',
   });
 });
@@ -174,9 +178,9 @@ const start = async () => {
   await createTables();
   await seedData();
   app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`🛡️  CORS allowed origins: ${ALLOWED_ORIGINS.join(', ')}`);
-    console.log(`⚡  Rate limit: ${MAX_REQUESTS} req / ${WINDOW_MS / 1000}s per IP`);
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`CORS allowed origins: ${ALLOWED_ORIGINS.join(', ')}`);
+    console.log(`Rate limit: ${MAX_REQUESTS} req / ${WINDOW_MS / 1000}s per IP`);
   });
 };
 

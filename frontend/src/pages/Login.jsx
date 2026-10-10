@@ -33,7 +33,7 @@ export default function Login() {
   return (
     <div className="center-page">
       <div className="card">
-        <h2>📦 Inventory Manager</h2>
+        <h2>Inventory Manager</h2>
         <h3>Sign In</h3>
         {error && <p className="error">{error}</p>}
         <form onSubmit={handleSubmit}>
@@ -56,9 +56,8 @@ export default function Login() {
                 background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px',
                 color: 'var(--text-light)', lineHeight: 1,
               }}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
-              {showPassword ? '🙈' : '👁️'}
+              {showPassword ? 'Hide' : 'Show'}
             </button>
           </div>
           <button className="btn" type="submit" disabled={loading}>{loading ? 'Signing in...' : 'Sign In'}</button>

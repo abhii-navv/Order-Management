@@ -33,7 +33,7 @@ export default function Register() {
   return (
     <div className="center-page">
       <div className="card">
-        <h2>📦 Inventory Manager</h2>
+        <h2>Inventory Manager</h2>
         <h3>Create Account</h3>
         {error && <p className="error">{error}</p>}
         <form onSubmit={handleSubmit}>
@@ -59,7 +59,7 @@ export default function Register() {
               }}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
-              {showPassword ? '🙈' : '👁️'}
+              {showPassword ? 'Hide' : 'Show'}
             </button>
           </div>
           <button className="btn" type="submit" disabled={loading}>{loading ? 'Creating account...' : 'Register'}</button>
