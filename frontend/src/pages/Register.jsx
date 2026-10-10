@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Package, EyeOff, Eye } from 'lucide-react';
 import api from '../api';
 import '../styles/auth.css';
 
@@ -33,7 +34,7 @@ export default function Register() {
   return (
     <div className="center-page">
       <div className="card">
-        <h2>📦 Inventory Manager</h2>
+        <h2><Package size={24} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> Inventory Manager</h2>
         <h3>Create Account</h3>
         {error && <p className="error">{error}</p>}
         <form onSubmit={handleSubmit}>
@@ -59,7 +60,7 @@ export default function Register() {
               }}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
-              {showPassword ? '🙈' : '👁️'}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
           <button className="btn" type="submit" disabled={loading}>{loading ? 'Creating account...' : 'Register'}</button>

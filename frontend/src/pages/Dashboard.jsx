@@ -7,25 +7,26 @@ import {
   ResponsiveContainer, LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Area, AreaChart,
 } from "recharts";
+import { Package, IndianRupee, Hourglass, AlertTriangle, Users, Tag, ClipboardList, ShoppingCart, BarChart2, Search, TrendingUp, Trophy, Clock, HandMetal, AlertCircle } from "lucide-react";
 
 const KPI_DEFS = [
-  { key: "ordersToday",           label: "Orders Today",         icon: "📦", color: "#3B82F6", bg: "#EFF6FF", border: "#BFDBFE", fmt: (v) => v },
-  { key: "revenueThisMonth",      label: "Revenue This Month",   icon: "💰", color: "#CFA85C", bg: "#FBF6EB", border: "#EAD7AC", fmt: (v) => `₹${Number(v).toLocaleString("en-IN")}` },
-  { key: "pendingOrders",         label: "Pending Orders",       icon: "⏳", color: "#F59E0B", bg: "#FFFBEB", border: "#FDE68A", fmt: (v) => v },
-  { key: "lowStockProducts",      label: "Low Stock",            icon: "⚠️", color: "#EF4444", bg: "#FEF2F2", border: "#FECACA", fmt: (v) => v },
-  { key: "newCustomersThisMonth", label: "New Customers",        icon: "👤", color: "#8B5CF6", bg: "#F5F3FF", border: "#DDD6FE", fmt: (v) => v },
+  { key: "ordersToday",           label: "Orders Today",         icon: <Package size={20} />, color: "#3B82F6", bg: "#EFF6FF", border: "#BFDBFE", fmt: (v) => v },
+  { key: "revenueThisMonth",      label: "Revenue This Month",   icon: <IndianRupee size={20} />, color: "#CFA85C", bg: "#FBF6EB", border: "#EAD7AC", fmt: (v) => `₹${Number(v).toLocaleString("en-IN")}` },
+  { key: "pendingOrders",         label: "Pending Orders",       icon: <Hourglass size={20} />, color: "#F59E0B", bg: "#FFFBEB", border: "#FDE68A", fmt: (v) => v },
+  { key: "lowStockProducts",      label: "Low Stock",            icon: <AlertTriangle size={20} />, color: "#EF4444", bg: "#FEF2F2", border: "#FECACA", fmt: (v) => v },
+  { key: "newCustomersThisMonth", label: "New Customers",        icon: <Users size={20} />, color: "#8B5CF6", bg: "#F5F3FF", border: "#DDD6FE", fmt: (v) => v },
 ];
 
 const QUICK_LINKS = [
-  { to: "/products",   label: "Products",   icon: "📦", desc: "Manage inventory & stock" },
-  { to: "/categories", label: "Categories", icon: "🏷️", desc: "Organise product groups" },
-  { to: "/orders",     label: "Orders",     icon: "📋", desc: "View & fulfil orders" },
-  { to: "/cart",       label: "Cart",       icon: "🛒", desc: "Add items & checkout" },
+  { to: "/products",   label: "Products",   icon: <Package size={24} />, desc: "Manage inventory & stock" },
+  { to: "/categories", label: "Categories", icon: <Tag size={24} />, desc: "Organise product groups" },
+  { to: "/orders",     label: "Orders",     icon: <ClipboardList size={24} />, desc: "View & fulfil orders" },
+  { to: "/cart",       label: "Cart",       icon: <ShoppingCart size={24} />, desc: "Add items & checkout" },
 ];
 
 const ADMIN_LINKS = [
-  { to: "/reports",    label: "Reports",    icon: "📊", desc: "Sales & revenue insights" },
-  { to: "/audit-logs", label: "Audit Logs", icon: "🔍", desc: "Track all system changes" },
+  { to: "/reports",    label: "Reports",    icon: <BarChart2 size={24} />, desc: "Sales & revenue insights" },
+  { to: "/audit-logs", label: "Audit Logs", icon: <Search size={24} />, desc: "Track all system changes" },
 ];
 
 function getGreeting() {
@@ -97,7 +98,7 @@ export default function Dashboard() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
         <div>
           <h1 style={{ marginBottom: 4 }}>
-            {getGreeting()}{user.name ? `, ${user.name.split(" ")[0]}` : ""}! 👋
+            {getGreeting()}{user.name ? `, ${user.name.split(" ")[0]}` : ""}! <HandMetal size={28} style={{ verticalAlign: 'bottom' }} />
           </h1>
           <p style={{ color: "var(--text-light)", fontSize: 14 }}>
             Here&apos;s what&apos;s happening with your store today.
@@ -113,7 +114,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {error && <p className="error">⚠️ {error}</p>}
+      {error && <p className="error"><AlertCircle size={16} style={{ verticalAlign: 'text-bottom' }} /> {error}</p>}
 
       {/* KPI Cards (admin) */}
       {user.role === "admin" && kpis && (
@@ -144,7 +145,7 @@ export default function Dashboard() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))", gap: 20, marginBottom: 28 }}>
           {salesData.length > 0 && (
             <div className="card" style={{ padding: "20px 20px 12px" }}>
-              <h4 style={{ marginBottom: 16, borderBottom: "1px solid var(--border)", paddingBottom: 10 }}>📈 Revenue Over Time</h4>
+              <h4 style={{ marginBottom: 16, borderBottom: "1px solid var(--border)", paddingBottom: 10 }}><TrendingUp size={18} style={{ verticalAlign: 'text-bottom', marginRight: '4px' }} /> Revenue Over Time</h4>
               <ResponsiveContainer width="100%" height={200}>
                 <AreaChart data={salesData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                   <defs>
@@ -164,7 +165,7 @@ export default function Dashboard() {
           )}
           {topProducts.length > 0 && (
             <div className="card" style={{ padding: "20px 20px 12px" }}>
-              <h4 style={{ marginBottom: 16, borderBottom: "1px solid var(--border)", paddingBottom: 10 }}>🏆 Top Products by Revenue</h4>
+              <h4 style={{ marginBottom: 16, borderBottom: "1px solid var(--border)", paddingBottom: 10 }}><Trophy size={18} style={{ verticalAlign: 'text-bottom', marginRight: '4px' }} /> Top Products by Revenue</h4>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={topProducts.slice(0, 5)} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F3F0E6" />
@@ -210,7 +211,7 @@ export default function Dashboard() {
       {user.role === "admin" && lowStock.length > 0 && (
         <div className="card" style={{ padding: 0, overflow: "hidden", marginBottom: 28 }}>
           <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <h3 style={{ margin: 0, color: "#B91C1C" }}>⚠️ Low Stock Alert ({lowStock.length})</h3>
+            <h3 style={{ margin: 0, color: "#B91C1C", display: 'flex', alignItems: 'center', gap: '8px' }}><AlertTriangle size={20} /> Low Stock Alert ({lowStock.length})</h3>
             <Link to="/products" className="btn-sm">View All →</Link>
           </div>
           <table className="table" style={{ marginTop: 0, boxShadow: "none", border: "none", borderRadius: 0 }}>
@@ -238,7 +239,7 @@ export default function Dashboard() {
       {recentOrders.length > 0 && (
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
           <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <h3 style={{ margin: 0 }}>🕑 Recent Orders</h3>
+            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}><Clock size={20} /> Recent Orders</h3>
             <Link to="/orders" className="btn-sm">View All →</Link>
           </div>
           <table className="table" style={{ marginTop: 0, boxShadow: "none", border: "none", borderRadius: 0 }}>
@@ -270,7 +271,7 @@ export default function Dashboard() {
 
       {!loading && recentOrders.length === 0 && (
         <div className="card" style={{ textAlign: "center", padding: "48px 24px" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🛒</div>
+          <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}><ShoppingCart size={48} color="var(--text-muted)" /></div>
           <h3 style={{ justifyContent: "center", marginBottom: 8 }}>No orders yet</h3>
           <p style={{ color: "var(--text-muted)", marginBottom: 20 }}>Browse products and place your first order.</p>
           <Link to="/products" className="btn">Browse Products</Link>

@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { Store, LogOut } from "lucide-react";
 
 const NAV_ITEMS = [
   {
@@ -91,7 +92,7 @@ const NAV_ITEMS = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, closeSidebar }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { totalItems } = useCart();
@@ -113,10 +114,10 @@ export default function Sidebar() {
     .slice(0, 2);
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       {/* Logo */}
       <Link to="/" className="sidebar-logo">
-        <div className="sidebar-logo-icon">🛍️</div>
+        <div className="sidebar-logo-icon"><Store size={24} color="#CFA85C" /></div>
         <span className="sidebar-logo-text">
           Shop<span>Ease</span>
         </span>
@@ -138,6 +139,7 @@ export default function Sidebar() {
                     key={item.to}
                     to={item.to}
                     className={`sidebar-link${active ? " active" : ""}`}
+                    onClick={closeSidebar}
                   >
                     {item.icon}
                     {item.label}
@@ -160,7 +162,7 @@ export default function Sidebar() {
           <div className="sidebar-user-role">{user.role || "member"}</div>
         </div>
         <button className="sidebar-logout-btn" onClick={logout} title="Logout">
-          ⏻
+          <LogOut size={18} />
         </button>
       </div>
     </aside>
